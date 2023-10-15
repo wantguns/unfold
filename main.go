@@ -4,7 +4,6 @@ import (
 	"os"
 	"os/signal"
 
-	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
 	"github.com/spf13/viper"
 
@@ -23,10 +22,6 @@ func main() {
 	}()
 
 	defer viper.WriteConfig()
-
-	// TODO: Use a flag for this
-	zerolog.SetGlobalLevel(zerolog.DebugLevel)
-	log.Logger = log.Output(zerolog.ConsoleWriter{Out: os.Stderr})
 
 	cmd.Execute()
 }

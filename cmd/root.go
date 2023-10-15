@@ -5,6 +5,7 @@ import (
 	"runtime"
 
 	"github.com/google/uuid"
+	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
@@ -12,6 +13,7 @@ import (
 
 var (
 	cfgFile string
+	enableDebug bool
 
 	rootCmd = &cobra.Command{
 		Use:   "unfold",
@@ -23,10 +25,19 @@ func init() {
 	cobra.OnInitialize(initConfig)
 
 	rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is $HOME/.config/unfold/config.yaml)")
+	rootCmd.PersistentFlags().BoolVarP(&enableDebug, "debug", "v", os.Getenv("DEBUG") == "true", "Enable debug mode")
 	rootCmd.AddCommand(LoginCmd, RefreshCmd, UserCmd, AvailabilityCmd, TransactionsCmd)
 }
 
 func initConfig() {
+
+	if enableDebug {
+		zerolog.SetGlobalLevel(zerolog.DebugLevel)
+	} else {
+		zerolog.SetGlobalLevel(zerolog.InfoLevel)
+	}
+	log.Logger = log.Output(zerolog.ConsoleWriter{Out: os.Stderr})
+
 	if cfgFile != "" {
 		viper.SetConfigFile(cfgFile)
 		err := viper.ReadInConfig()
