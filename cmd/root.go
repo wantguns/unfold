@@ -42,11 +42,6 @@ func initConfig() {
 	// Config File
 	if cfgFile != "" {
 		viper.SetConfigFile(cfgFile)
-		err := viper.ReadInConfig()
-		if err != nil {
-			log.Error().Err(err).Msg("Failed to read config file")
-			runtime.Goexit()
-		}
 	} else {
 		cfgDir, err := os.UserConfigDir()
 		cobra.CheckErr(err)
@@ -64,20 +59,12 @@ func initConfig() {
 		viper.SetConfigName("config")
 
 		viper.SetDefault("device_hash", uuid.NewString())
-
-		err = viper.ReadInConfig()
-		if err != nil {
-			log.Error().Err(err).Msg("Failed to read config file")
-			runtime.Goexit()
-		}
-
 		viper.SafeWriteConfig()
 	}
 
 	viper.AutomaticEnv()
 
 	viper.ReadInConfig()
-
 }
 
 // Execute executes the root command.
