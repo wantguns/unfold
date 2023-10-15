@@ -2,9 +2,12 @@ package cmd
 
 import (
 	"fmt"
+	"os"
+	"os/signal"
 	"runtime"
 	"time"
 
+	"github.com/robfig/cron/v3"
 	"github.com/rs/zerolog/log"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
@@ -17,7 +20,7 @@ import (
 var TransactionsCmd = &cobra.Command{
 	Use:   "transactions",
 	Short: "Prints the transactions from all of your accounts (default period: 1 month)",
-	Run:   transactionsCmdHandler,
+	Run:   setupTransactionsCmdHandler,
 }
 
 func init() {
@@ -29,6 +32,46 @@ func init() {
 	TransactionsCmd.Flags().StringP("since", "s", yesterday, "fetch transactions since in this format: YYYY-MM-DD")
 	TransactionsCmd.Flags().BoolP("db", "d", false, "Save the results in a sqlite db")
 	TransactionsCmd.Flags().StringP("db-path", "D", "db.sqlite", "Sets path for the database")
+	TransactionsCmd.Flags().StringP("watch", "w", "", "Set an internal cron job to trigger this command. You can use non-standard cron expressions like '@every 6h'. This will disable plaintext mode, so add a '-d' flag if you want to write to db")
+}
+
+func setupTransactionsCmdHandler(cmd *cobra.Command, args []string) {
+	watch, _ := cmd.Flags().GetString("watch")
+	if watch == "" {
+		// Fetch transactions in a oneshot manner
+
+		// Update the `plaintext` value
+		oldArgs := os.Args[1:]
+		log.Debug().Msgf("Old arguments %+v", oldArgs)
+		cmd.SetArgs(append(oldArgs, "--no-plaintext"))
+
+		transactionsCmdHandler(cmd, args)
+	} else {
+		log.Info().Msg("Cron job set for fetching transactions, going into daemon mode")
+
+		// Fetch transactions once before going into cron land
+		transactionsCmdHandler(cmd, args)
+		till, _ := cmd.Flags().GetString("till")
+		log.Info().Msgf("Fetched transactions till %s", till)
+
+		c := cron.New()
+		c.AddFunc(watch, func() {
+
+			// Update the `till` and `plaintext` value
+			now := time.Now().Format(time.DateOnly)
+			oldArgs := os.Args[1:]
+			log.Debug().Msgf("Old arguments %+v", oldArgs)
+			cmd.SetArgs(append(oldArgs, fmt.Sprintf("--till=%s", now), "--no-plaintext"))
+
+			transactionsCmdHandler(cmd, args)
+			log.Info().Msgf("Fetched transactions till %s", now)
+		})
+
+		go c.Start()
+		sig := make(chan os.Signal)
+		signal.Notify(sig, os.Interrupt, os.Kill)
+		<-sig
+	}
 }
 
 func printTransactions(t api.FilteredTransactions) {
@@ -108,7 +151,9 @@ func transactionsCmdHandler(cmd *cobra.Command, args []string) {
 			writeToDb(t[i])
 		}
 
-		// always printTransactions
-		printTransactions(t[i])
+		// If plaintext is enabled
+		if noPlaintext := cmd.Flags().Lookup("no-plaintext"); noPlaintext != nil {
+			printTransactions(t[i])
+		}
 	}
 }
