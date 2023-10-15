@@ -67,9 +67,8 @@ func transactionsCmdHandler(cmd *cobra.Command, args []string) {
 	t := transactions.Transactions
 	for i := 0; i < len(t); i++ {
 		fmt.Printf(
-			"%v\t%v\t%v\t%v\t%v\t%v\t%v\t%v\n",
+			"%v\t%v\t%v\t%v\t%v\t%v\t%v\n",
 			t[i].UUID,
-			t[i].TxnDate,
 			t[i].TxnTimestamp,
 			t[i].Amount,
 			t[i].Type,
