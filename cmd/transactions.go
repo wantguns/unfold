@@ -38,9 +38,9 @@ func printTransactions(t api.FilteredTransactions) {
 		t.TxnTimestamp,
 		t.Amount,
 		t.Type,
-		t.Sender,
+		t.Merchant,
 		t.CurrentBalance,
-		t.Receiver,
+		t.Account,
 	)
 }
 
@@ -50,9 +50,9 @@ func writeToDb(t api.FilteredTransactions) {
 		Timestamp:      t.TxnTimestamp,
 		Amount:         t.Amount,
 		Type:           t.Type,
-		Sender:         t.Sender,
+		Merchant:       t.Merchant,
 		CurrentBalance: t.CurrentBalance,
-		Receiver:       t.Receiver,
+		Account:        t.Account,
 	})
 }
 
