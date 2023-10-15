@@ -12,7 +12,7 @@ import (
 )
 
 var (
-	cfgFile string
+	cfgFile     string
 	enableDebug bool
 
 	rootCmd = &cobra.Command{
@@ -31,6 +31,7 @@ func init() {
 
 func initConfig() {
 
+	// Debug Flag
 	if enableDebug {
 		zerolog.SetGlobalLevel(zerolog.DebugLevel)
 	} else {
@@ -38,6 +39,7 @@ func initConfig() {
 	}
 	log.Logger = log.Output(zerolog.ConsoleWriter{Out: os.Stderr})
 
+	// Config File
 	if cfgFile != "" {
 		viper.SetConfigFile(cfgFile)
 		err := viper.ReadInConfig()

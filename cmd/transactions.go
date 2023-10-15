@@ -8,8 +8,10 @@ import (
 	"github.com/rs/zerolog/log"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
+	"gorm.io/gorm/clause"
 
 	"github.com/wantguns/unfold/api"
+	"github.com/wantguns/unfold/db"
 )
 
 var TransactionsCmd = &cobra.Command{
@@ -25,12 +27,40 @@ func init() {
 
 	TransactionsCmd.Flags().StringP("till", "t", today, "fetch transactions till in this format: YYYY-MM-DD")
 	TransactionsCmd.Flags().StringP("since", "s", yesterday, "fetch transactions since in this format: YYYY-MM-DD")
+	TransactionsCmd.Flags().BoolP("db", "d", false, "Save the results in a sqlite db")
+	TransactionsCmd.Flags().StringP("db-path", "D", "db.sqlite", "Sets path for the database")
+}
+
+func printTransactions(t api.FilteredTransactions) {
+	fmt.Printf(
+		"%v\t%v\t%v\t%v\t%v\t%v\t%v\n",
+		t.UUID,
+		t.TxnTimestamp,
+		t.Amount,
+		t.Type,
+		t.Sender,
+		t.CurrentBalance,
+		t.Receiver,
+	)
+}
+
+func writeToDb(t api.FilteredTransactions) {
+	db.Conn.Clauses(clause.OnConflict{UpdateAll: true}).Create(&db.Transactions{
+		UUID:           t.UUID,
+		Timestamp:      t.TxnTimestamp,
+		Amount:         t.Amount,
+		Type:           t.Type,
+		Sender:         t.Sender,
+		CurrentBalance: t.CurrentBalance,
+		Receiver:       t.Receiver,
+	})
 }
 
 func transactionsCmdHandler(cmd *cobra.Command, args []string) {
 
 	uuid := viper.GetString("fold_user.uuid")
 
+	// till Flag
 	tillStr, _ := cmd.Flags().GetString("till")
 	till, err := time.Parse(time.DateOnly, tillStr)
 	if err != nil {
@@ -41,6 +71,7 @@ func transactionsCmdHandler(cmd *cobra.Command, args []string) {
 		till = time.Now()
 	}
 
+	// since Flag
 	minSince, _, err := api.Availability(uuid)
 	if err != nil {
 		log.Error().Err(err).Msg("Fetch Availability: ")
@@ -56,25 +87,28 @@ func transactionsCmdHandler(cmd *cobra.Command, args []string) {
 		since = minSince
 	}
 
+	// db Flag
+	writeDb, _ := cmd.Flags().GetBool("db")
+	dbPath, _ := cmd.Flags().GetString("db-path")
+	if writeDb {
+		db.Init(dbPath)
+		log.Debug().Msgf("Database path %s", dbPath)
+	}
+
 	transactions, err := api.Transactions(uuid, since, till)
 	if err != nil {
 		log.Error().Err(err).Msg("Refresh response: ")
 		runtime.Goexit()
 	}
 
-	fmt.Println("Fetched transactions")
-
 	t := transactions.Transactions
 	for i := 0; i < len(t); i++ {
-		fmt.Printf(
-			"%v\t%v\t%v\t%v\t%v\t%v\t%v\n",
-			t[i].UUID,
-			t[i].TxnTimestamp,
-			t[i].Amount,
-			t[i].Type,
-			t[i].Sender,
-			t[i].CurrentBalance,
-			t[i].Receiver,
-		)
+		// Insert into db
+		if writeDb {
+			writeToDb(t[i])
+		}
+
+		// always printTransactions
+		printTransactions(t[i])
 	}
 }

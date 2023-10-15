@@ -13,7 +13,7 @@ import (
 func main() {
 	c := make(chan os.Signal, 1)
 	signal.Notify(c, os.Interrupt)
-	go func(){
+	go func() {
 		for range c {
 			log.Error().Msg("SIGINT recieved, shutting down")
 			viper.WriteConfig()
