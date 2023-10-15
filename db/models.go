@@ -10,6 +10,6 @@ type Transactions struct {
 	CurrentBalance float64
 	Timestamp      time.Time `gorm:"index:sortTimestamp,sort:desc"`
 	Type           string
-	Receiver       string
-	Sender         string
+	Account       string
+	Merchant         string
 }

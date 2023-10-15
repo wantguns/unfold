@@ -79,8 +79,8 @@ type FilteredTransactions struct {
 	CurrentBalance float64   `json:"current_balance"`
 	TxnTimestamp   time.Time `json:"txn_timestamp"`
 	Type           string    `json:"type"`
-	Receiver       string    `json:"reciever"`
-	Sender         string    `json:"sender"`
+	Account       string    `json:"account"`
+	Merchant         string    `json:"merchant"`
 }
 
 type TransactionsReturn struct {
@@ -105,15 +105,15 @@ func filterTransactions(raw TransactionsResponse, since time.Time) []FilteredTra
 			UUID:           t[i].UUID,
 			Amount:         t[i].Amount,
 			Type:           t[i].Type,
-			Sender:         t[i].FinancialInformationProvider.Name,
-			Receiver:       t[i].Narration,
+			Merchant:         t[i].FinancialInformationProvider.Name,
+			Account:       t[i].Narration,
 			TxnTimestamp:   t[i].TxnTimestamp,
 			CurrentBalance: t[i].CurrentBalance,
 		}
 
 		// Use Fold's F1 classifier if this transaction was classified
 		if t[i].Merchant != nil {
-			transaction.Receiver = t[i].Merchant.(string)
+			transaction.Account = t[i].Merchant.(string)
 		}
 
 		transactions = append(transactions, transaction)
