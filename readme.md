@@ -1,7 +1,8 @@
 # Unfold
 
-Unfold is an unofficial [Fold Money](https://fold.money) CLI client, which covers the bare
-minimum API routes to fetch your transactions for a given period.  
+Unfold is an unofficial [Fold Money](https://fold.money) CLI client, which
+covers the bare minimum API routes to fetch your transactions for a given
+period.  
 
 Fold's API is not publically available, I had to MITM their app to write this
 tool, and so **there might be unforeseen consequences for your Fold account if
@@ -14,7 +15,9 @@ you use this tool**.
 
 ### Usage
 
-**Caution: For all I know, Fold has not publically released a client which can support multiple sessions, which means when you use this CLI, you will be automatically logged out on your Phone's app**
+**Caution: For all I know, Fold has not publically released a client which can
+support multiple sessions, which means when you use this CLI, you will be
+automatically logged out on your Phone's app**
 
 1. First, login to your account:
     ```bash
@@ -26,7 +29,8 @@ you use this tool**.
     $ unfold transactions -h
     ```
 
-There are a few more subcommands which Unfold provides and uses internally. You can get a list by:
+There are a few more subcommands which Unfold provides and uses internally. You
+can get a list by:
 ```bash
 $ unfold
 An unofficial cli client for fold.money
