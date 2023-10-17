@@ -105,8 +105,8 @@ func filterTransactions(raw TransactionsResponse, since time.Time) []FilteredTra
 			UUID:           t[i].UUID,
 			Amount:         t[i].Amount,
 			Type:           t[i].Type,
-			Merchant:       t[i].FinancialInformationProvider.Name,
-			Account:        t[i].Narration,
+			Account:        t[i].FinancialInformationProvider.Name,
+			Merchant:       t[i].Narration,
 			TxnTimestamp:   t[i].TxnTimestamp,
 			CurrentBalance: t[i].CurrentBalance,
 		}
