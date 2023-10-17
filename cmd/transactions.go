@@ -32,6 +32,7 @@ func init() {
 	TransactionsCmd.Flags().StringP("since", "s", yesterday, "fetch transactions since in this format: YYYY-MM-DD")
 	TransactionsCmd.Flags().BoolP("db", "d", false, "Save the results in a sqlite db")
 	TransactionsCmd.Flags().StringP("db-path", "D", "db.sqlite", "Sets path for the database")
+	TransactionsCmd.Flags().Bool("no-plaintext", false, "Do not return plaintext output")
 	TransactionsCmd.Flags().StringP("watch", "w", "", "Set an internal cron job to trigger this command. You can use non-standard cron expressions like '@every 6h'. This will disable plaintext mode, so add a '-d' flag if you want to write to db")
 }
 
@@ -58,7 +59,7 @@ func setupTransactionsCmdHandler(cmd *cobra.Command, args []string) {
 		c.AddFunc(watch, func() {
 
 			// Update the `till` and `plaintext` value
-			now := time.Now().Format(time.DateOnly)
+			now := time.Now().AddDate(0, 0, 1).Format(time.DateOnly)
 			oldArgs := os.Args[1:]
 			log.Debug().Msgf("Old arguments %+v", oldArgs)
 			cmd.SetArgs(append(oldArgs, fmt.Sprintf("--till=%s", now), "--no-plaintext"))
@@ -152,7 +153,7 @@ func transactionsCmdHandler(cmd *cobra.Command, args []string) {
 		}
 
 		// If plaintext is enabled
-		if noPlaintext := cmd.Flags().Lookup("no-plaintext"); noPlaintext != nil {
+		if noPlaintext, _ := cmd.Flags().GetBool("no-plaintext"); noPlaintext {
 			printTransactions(t[i])
 		}
 	}

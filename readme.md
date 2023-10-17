@@ -52,10 +52,10 @@ automatically logged out on your Phone's app**
       $ unfold transactions -s 2023-09-20 --db -w '@every 20s'
       12:19AM INF Cron job set for fetching transactions, going into daemon mode
       12:19AM INF Fetched transactions till 2023-10-17
-      12:20AM INF Fetched transactions till 2023-10-16
+      12:20AM INF Fetched transactions till 2023-10-17
       ```
 
-    c. For a complete glossary of available options:
+    d. For a complete glossary of available options:
       ```
       $ unfold transactions -h
       Prints the transactions from all of your accounts (default period: 1 month)
