@@ -113,7 +113,7 @@ func filterTransactions(raw TransactionsResponse, since time.Time) []FilteredTra
 
 		// Use Fold's F1 classifier if this transaction was classified
 		if t[i].Merchant != nil {
-			transaction.Account = t[i].Merchant.(string)
+			transaction.Merchant = t[i].Merchant.(string)
 		}
 
 		transactions = append(transactions, transaction)
